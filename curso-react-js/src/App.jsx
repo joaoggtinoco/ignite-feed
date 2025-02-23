@@ -21,7 +21,7 @@ const post = [
     publishedAt: new Date("2023-02-21 20:06")
   },
   {
-    id: 2,
+    id: 3,
     author: {
       avatarUrl: "https://avatars.githubusercontent.com/u/67712405?v=4",
       name: "Bergameu Tinoco",
@@ -47,7 +47,7 @@ export function App() {
             post.map(post => {
               return (
                 <Post
-                id={post.id}
+                  key={post.id}
                   author={post.author}
                   content={post.content}
                   publishedAt={post.publishedAt}

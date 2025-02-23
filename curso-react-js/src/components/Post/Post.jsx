@@ -7,7 +7,7 @@ import { useState } from 'react';
 
 export function Post({ author, content, publishedAt }) {
     const [comments, setComments] = useState([])
-    const [newComment, setNewComment] = useState('')
+    const [newCommentText, setNewCommentText] = useState('')
 
     const publishedDateFormatted = format(publishedAt, "d 'de' LLLL 'às' HH:mm'h'",
         { locale: ptBR }
@@ -19,15 +19,29 @@ export function Post({ author, content, publishedAt }) {
         }
     )
 
+    const isNewCommentEmpty = newCommentText.length === 0;
+
     function handleCreateNewComment() {
         event.preventDefault()
         const newComment = event.target.comment.value
         setComments([...comments, newComment])
-        setNewComment('')
+        setNewCommentText('')
     }
 
-    function handleNewCommentChange(){
-        setNewComment(event.target.value)
+    function handleNewCommentChange() {
+        event.target.setCustomValidity('')
+        setNewCommentText(event.target.value)
+    }
+
+    function deleteComment(commentToDelete) {
+        const commentsWithoutDeletedOne = comments.filter(comment => {
+            return comment != commentToDelete
+        })
+        setComments(commentsWithoutDeletedOne)
+    }
+
+    function handleNewCommentInvalid() {
+        event.target.setCustomValidity('Campo obrigatório');
     }
 
     return (
@@ -47,10 +61,10 @@ export function Post({ author, content, publishedAt }) {
                 {
                     content.map(line => {
                         if (line.type === 'text') {
-                            return (<p>{line.content}</p>)
+                            return (<p key={line.id}>{line.content}</p>)
                         }
                         else if (line.type === 'link') {
-                            return (<a>{line.content}</a>)
+                            return (<a key={line.id}>{line.content}</a>)
                         }
                     })
                 }
@@ -60,19 +74,27 @@ export function Post({ author, content, publishedAt }) {
 
                 <textarea
                     name="comment"
-                    placeholder='Deixe seu comentário' textarea
-                    value={newComment}
+                    placeholder='Deixe seu comentário'
+                    value={newCommentText}
                     onChange={handleNewCommentChange}
+                    required //No react quando a prop for booleana, caso o valor desejado deja true, não é preciso passar o valor pois vem default
+                    onInvalid={handleNewCommentInvalid}
                 />
                 <footer>
-                    <button type='submit'>Publicar</button>
+                    <button type='submit' disabled={isNewCommentEmpty}>Publicar</button>
                 </footer>
             </form>
 
             <div className={styles.commentList}>
                 {
                     comments.map(comment => {
-                        return <Comment content={comment} />
+                        return (
+                            <Comment
+                                key={comment}
+                                comment={comment}
+                                onDeleteComment={deleteComment}
+                            />
+                        )
                     })
                 }
             </div>
